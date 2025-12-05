@@ -1,0 +1,120 @@
+body{
+    background-color: white;
+}
+.common{
+    position: absolute;
+}
+.nav{
+    position: relative;
+    z-index: 2;
+    font-size: larger;
+}
+.nav-left{
+    float: left;
+}
+.nav-right{
+    float: right;
+}
+.nav-left{
+    float: left;
+}
+.nav-right{
+    float: right;
+}
+.header{
+    background-color: rgb(213, 249, 208);
+    text-align: center;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    height: auto;
+    z-index: 1;
+}
+.main{
+    background-color: lightyellow;
+    top: 82px;
+    left: 0px;
+    right: 0px;
+    bottom: auto;
+    padding-left: 50px;
+    padding-right: 50px;
+    text-align: center;
+}
+.footer{
+    position: fixed;
+    text-align: center;
+    font-style: italic;
+    font-size: smaller;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    height: auto;
+    background-color: rgb(213, 249, 208);
+}
+img{
+    width: 40%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+iframe{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Left-align lists while keeping other content centered */
+ol, ul {
+    text-align: left;
+    display: inline-block;
+}
+
+/* Limit click area to the image link only */
+/* .image-link{
+    display: inline-block;
+}
+.image-link img{
+    display: block;
+} */
+
+/* Reusable button for resume links */
+.resume-btn{
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: lightyellow;
+    color: black;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 4px 10px lightyellow;
+    transition: background .15s ease, transform .08s ease, box-shadow .15s ease;
+}
+.resume-btn:hover{
+    background: lightyellow;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px lightyellow;
+}
+.resume-btn:active{
+    transform: translateY(0);
+}
+
+/* Back to top button */
+.back-to-top{
+    display: inline-block;
+    padding: 8px 14px;
+    margin-top: 12px;
+    border-radius: 6px;
+    background: lightyellow;
+    color: black;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.15s ease, transform 0.08s ease;
+}
+.back-to-top:hover{
+    background: lightyellow;
+    transform: translateY(-1px);
+}
+.back-to-top:active{
+    transform: translateY(0);
+}

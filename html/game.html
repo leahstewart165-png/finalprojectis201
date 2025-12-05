@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Exciting Joke Generator</title>
+<style>
+    body {
+        background: linear-gradient(#d9ecff, #b5d8ff);
+        font-family: "Quicksand", "Segoe UI", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .container {
+        background: white;
+        padding: 30px 40px;
+        border-radius: 20px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        text-align: center;
+        max-width: 500px;
+    }
+
+    h1 {
+        color: #2a5fba;
+        margin-bottom: 20px;
+    }
+
+    button {
+        background: #2a5fba;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: 0.25s;
+    }
+
+    button:hover {
+        background: #1f4a93;
+    }
+
+    #jokeBox {
+        font-size: 20px;
+        margin-top: 30px;
+        min-height: 120px;
+        color: #003b7a;
+    }
+
+    #answerBtn {
+        display: none;
+        margin-top: 15px;
+        background: #0d6efd;
+    }
+
+    #answerText {
+        margin-top: 15px;
+        font-size: 20px;
+        color: #003b7a;
+        display: none;
+        font-weight: bold;
+    }
+
+    /* Confetti */
+    .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background: red;
+        top: -20px;
+        animation: fall linear forwards;
+        opacity: 0.8;
+    }
+
+    @keyframes fall {
+        to {
+            transform: translateY(110vh) rotate(360deg);
+            opacity: 1;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>The Ultimate Joke Generator</h1>
+    <button onclick="startJoke()">Generate Joke</button>
+
+    <div id="jokeBox"></div>
+
+    <button id="answerBtn" onclick="revealAnswer()">Reveal Answer</button>
+    <div id="answerText"></div>
+</div>
+
+<script>
+/* ------------------ JOKES DATABASE ------------------ */
+
+const jokes = [
+    { q: "Why don’t skeletons fight each other?", a: "They don’t have the guts." },
+    { q: "Why did the scarecrow win an award?", a: "Because he was outstanding in his field." },
+    { q: "What do you call fake spaghetti?", a: "An impasta." },
+    { q: "Why did the math book look sad?", a: "Because it had too many problems." },
+    { q: "Why do seagulls fly over the ocean?", a: "Because if they flew over the bay, they'd be bagels." },
+    { single: "I tried to catch some fog yesterday. I mist." },
+    { single: "I told my computer I needed a break… and now it won’t stop sending me Kit-Kats." },
+    { single: "I used to play piano by ear, but now I use my hands." },
+    { q: "Why can’t you trust stairs?", a: "They’re always up to something." },
+    { q: "What do you call a belt made out of watches?", a: "A waist of time." }
+];
+
+/* ------------------ CONFETTI ------------------ */
+function launchConfetti() {
+    for (let i = 0; i < 100; i++) {
+        const conf = document.createElement("div");
+        conf.className = "confetti";
+        conf.style.left = Math.random() * window.innerWidth + "px";
+        conf.style.background = ["#ff5f5f","#ffea5f","#5fff9f","#5fb8ff","#c95fff"][Math.floor(Math.random()*5)];
+        conf.style.animationDuration = (1 + Math.random() * 2) + "s";
+        document.body.appendChild(conf);
+
+        setTimeout(() => conf.remove(), 3000);
+    }
+}
+
+/* ------------------ JOKE SPINNER ------------------ */
+
+function startJoke() {
+    document.getElementById("answerBtn").style.display = "none";
+    document.getElementById("answerText").style.display = "none";
+    document.getElementById("answerText").innerHTML = "";
+
+    let box = document.getElementById("jokeBox");
+    let spinCount = 20; // how many rapid cycles
+    let i = 0;
+
+    const spinInterval = setInterval(() => {
+        const random = jokes[Math.floor(Math.random() * jokes.length)];
+        box.innerHTML = random.q ? random.q : random.single;
+        i++;
+
+        if (i >= spinCount) {
+            clearInterval(spinInterval);
+
+            // Final dramatic joke selection
+            setTimeout(() => {
+                const chosen = jokes[Math.floor(Math.random() * jokes.length)];
+                showFinalJoke(chosen);
+                launchConfetti();
+            }, 300);
+        }
+    }, 80);
+}
+
+function showFinalJoke(joke) {
+    let box = document.getElementById("jokeBox");
+
+    if (joke.single) {
+        box.innerHTML = joke.single;
+    } else {
+        box.innerHTML = joke.q;
+        document.getElementById("answerBtn").style.display = "inline-block";
+        document.getElementById("answerBtn").dataset.answer = joke.a;
+    }
+}
+
+function revealAnswer() {
+    let btn = document.getElementById("answerBtn");
+    let answer = btn.dataset.answer;
+
+    document.getElementById("answerText").innerHTML = answer;
+    document.getElementById("answerText").style.display = "block";
+    btn.style.display = "none";
+}
+</script>
+
+</body>
+</html>
