@@ -1,248 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Brazil Mini-Games</title>
-<style>
-    body {
-        font-family: 'Verdana', sans-serif;
-        background: linear-gradient(to bottom, #a7e0ff, #e8f7ff);
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        min-height: 100vh;
-    }
-    .container {
-        width: 90%;
-        max-width: 900px;
-        background: white;
-        margin-top: 30px;
-        padding: 25px;
-        border-radius: 18px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    }
-    h1 {
-        text-align: center;
-        color: #0077aa;
-        margin-bottom: 20px;
-    }
-    h2 {
-        color: #00995c;
-        margin-top: 40px;
-    }
-    button {
-        background-color: #00995c;
-        color: white;
-        border: none;
-        padding: 10px 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1rem;
-    }
-    button:hover { background-color: #007e4b; }
-    .option-btn {
-        display: block;
-        width: 100%;
-        margin: 8px 0;
-        text-align: left;
-    }
-    .correct { background-color: #4CAF50 !important; color: white; }
-    .incorrect { background-color: #E53935 !important; color: white; }
-    .hidden { display: none; }
-    .rhythm-buttons { display: flex; gap: 12px; margin-top: 15px; }
-    .pad {
-        width: 70px; height: 70px;
-        background: #0084c7;
-        border-radius: 10px;
-        display: flex; justify-content: center; align-items: center;
-        font-size: 1.5rem; color: white; cursor: pointer;
-    }
-    .pad:active { background: #005f8f; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brazil Fun Facts & Emoji Memory</title>
+    <style>
+        /* --- General Styles --- */
+        :root {
+            --primary-color: #8BC34A; /* Light Green */
+            --bg-color: #e8f5e9; /* Subtle Pastel Green */
+            --text-color: #333;
+            --correct-color: #4CAF50; /* Darker Green (used for success) */
+            --incorrect-color: #F44336; /* Red (used for failure/timer) */
+            --play-again-color: #ffc107; /* Yellow/Orange */
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .game-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        
+        /* Specific Button Styles */
+        #trivia-play-again, #memory-play-again {
+            background-color: var(--play-again-color);
+            color: var(--text-color);
+        }
+        #memory-start {
+             background-color: var(--primary-color); 
+             color: white;
+        }
+
+
+        /* --- Trivia Game Styles (Unchanged) --- */
+        #trivia-options button {
+            background-color: #e0e0e0;
+            color: var(--text-color);
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        #trivia-options button:hover:not(.correct):not(.incorrect):not(:disabled) {
+            background-color: #d0d0d0;
+        }
+
+        .trivia-btn-next {
+            background-color: var(--correct-color);
+            color: white;
+            float: right;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* Feedback Colors */
+        .correct {
+            background-color: var(--correct-color) !important;
+            color: white !important;
+        }
+        .incorrect {
+            background-color: var(--incorrect-color) !important;
+            color: white !important;
+        }
+        
+        /* --- Emoji Memory Game Styles --- */
+        #memory-game {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .card {
+            background-color: #ccc;
+            height: 120px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Increased size for better emoji visibility */
+            font-size: 3em; 
+        }
+        .card-front {
+            background: #2196F3; /* Card back color (Blue) */
+            color: white;
+            border: 3px solid var(--primary-color);
+        }
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+        }
+        .match {
+            border: 3px solid var(--correct-color);
+            pointer-events: none; /* Matched cards are unclickable */
+        }
+        #memory-status {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        #timer {
+            font-size: 1.5em;
+            color: var(--incorrect-color);
+            font-weight: bold;
+        }
+        
+        /* Confetti Effect (Simple Text/Emoji) */
+        .confetti-display {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes simpleConfettiAnim {
+            0% { opacity: 1; transform: translate(-50%, -50%); }
+            100% { opacity: 0; transform: translate(-50%, -100px); }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <h1>Brazil Mini-Games</h1>
 
-    <!-- Trivia Game -->
-    <h2>🇧🇷 Brazil Trivia</h2>
-    <div id="trivia-box">
-        <p id="trivia-question">Click start to begin!</p>
-        <div id="trivia-options"></div>
-        <button id="next-btn" class="hidden">Next</button><br><br>
-        <button id="start-trivia">Start Trivia</button>
-        <p id="score"></p>
+    <div class="game-container">
+        <h1>Trivia Challenge (5 Questions)</h1>
+        <div id="trivia-question-wrapper">
+            <h2 id="trivia-question-number">Question 1/5</h2>
+            <p id="trivia-question-text" style="font-size: 1.2em; font-weight: bold;">[Question Text Here]</p>
+        </div>
+        <div id="trivia-options">
+            </div>
+        <button id="trivia-next" class="trivia-btn-next" onclick="nextTriviaQuestion()">Next Question &raquo;</button>
+        <div id="trivia-results" style="text-align: center; margin-top: 30px;">
+            </div>
     </div>
 
-    <!-- Capoeira Rhythm Game -->
-    <h2>🎶 Capoeira Rhythm Game</h2>
-    <p>Repeat the sequence! Pads can be pressed or use keys A / S / D / F.</p>
-    <button id="start-rhythm">Start Rhythm Game</button>
-    <p id="sequence-display"></p>
-    <div class="rhythm-buttons">
-        <div class="pad" data-key="A">A</div>
-        <div class="pad" data-key="S">S</div>
-        <div class="pad" data-key="D">D</div>
-        <div class="pad" data-key="F">F</div>
+    <div class="game-container">
+        <h1>🌴 Brazilian Emoji Memory Game</h1>
+        <div style="display: flex; justify-content: space-around; align-items: center; margin-bottom: 10px;">
+            <div id="timer-display">Time Left: <span id="timer">60</span> seconds</div>
+            <button id="memory-start" onclick="startMemoryGame()">Start Game</button>
+        </div>
+        
+        <div id="memory-game-area">
+            <div id="memory-game">
+                </div>
+            <div id="memory-status">Click 'Start Game' to begin!</div>
+        </div>
+        <div id="memory-results" style="text-align: center; margin-top: 20px;">
+             </div>
     </div>
-    <p id="rhythm-result"></p>
+    
+    <div id="confetti" class="confetti-display"></div>
 
-    <!-- Audio for Rhythm -->
-    <audio id="snd-A" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-    <audio id="snd-S" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
-    <audio id="snd-D" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
-    <audio id="snd-F" src="https://actions.google.com/sounds/v1/cartoon/concussive_hit_guitar_boing.ogg"></audio>
-</div>
+    <script>
+        // --- DATA BANKS ---
 
-<script>
-/*************************** TRIVIA ***************************/
-const triviaQuestions = [
-  { q: "What is the capital of Brazil?", options: ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"], answer: 2 },
-  { q: "Which Brazilian dance is famous worldwide?", options: ["Samba", "Flamenco", "Tango", "Waltz"], answer: 0 },
-  { q: "What is Brazil’s national language?", options: ["Spanish", "Portuguese", "French", "English"], answer: 1 },
+        const triviaQuestions = [
+            // (30 questions remain the same as previous version)
+            { q: "What is the capital city of Brazil?", a: "Brasília", options: ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"] },
+            { q: "Which famous statue overlooks the city of Rio de Janeiro?", a: "Christ the Redeemer", options: ["Christ the Redeemer", "Pão de Açúcar (Sugarloaf Mountain)", "The Copacabana Mermaid", "Monument to the Bandeiras"] },
+            { q: "What is the largest river in Brazil by volume?", a: "Amazon River", options: ["Paraná River", "São Francisco River", "Tietê River", "Amazon River"] },
+            { q: "Which year did Brazil last win the FIFA World Cup?", a: "2002", options: ["1994", "2002", "2006", "1970"] },
+            { q: "What is the national language of Brazil?", a: "Portuguese", options: ["Spanish", "Portuguese", "French", "Brazilian"] },
+            { q: "Which Brazilian city is famous for its annual carnival?", a: "Rio de Janeiro", options: ["São Paulo", "Rio de Janeiro", "Porto Alegre", "Curitiba"] },
+            { q: "What is the predominant biome in the northern region of Brazil?", a: "Amazon Rainforest", options: ["Cerrado", "Caatinga", "Pampas", "Amazon Rainforest"] },
+            { q: "Which state is known as the coffee capital of Brazil?", a: "Minas Gerais", options: ["Bahia", "Rio Grande do Sul", "Minas Gerais", "Paraná"] },
+            { q: "What is the currency of Brazil?", a: "Real", options: ["Peso", "Cruzeiro", "Real", "Dollar"] },
+            { q: "Who was the first (and only) Brazilian to win a Formula 1 World Championship three times?", a: "Ayrton Senna", options: ["Nelson Piquet", "Emerson Fittipaldi", "Rubens Barrichello", "Ayrton Senna"] },
+            { q: "What is the tallest mountain peak in Brazil?", a: "Pico da Neblina", options: ["Pico Paraná", "Pico da Neblina", "Pedra da Gávea", "Monte Roraima"] },
+            { q: "What is the official motto of Brazil, found on its flag?", a: "Ordem e Progresso", options: ["Justiça e Paz", "Amor, União, e Trabalho", "Ordem e Progresso", "Independência ou Morte"] },
+            { q: "Which South American country does NOT border Brazil?", a: "Chile", options: ["Argentina", "Peru", "Chile", "Colombia"] },
+            { q: "The famous 'Itaipu Dam' is shared with which country?", a: "Paraguay", options: ["Uruguay", "Argentina", "Bolivia", "Paraguay"] },
+            { q: "Which city is the largest in Brazil by population?", a: "São Paulo", options: ["Rio de Janeiro", "Brasília", "São Paulo", "Belo Horizonte"] },
+            { q: "What is the Brazilian dessert made of condensed milk, butter, and chocolate powder?", a: "Brigadeiro", options: ["Pudim", "Mousse de Maracujá", "Brigadeiro", "Quindim"] },
+            { q: "Which mineral is Brazil the world's leading producer of?", a: "Iron Ore", options: ["Gold", "Bauxite", "Iron Ore", "Petroleum"] },
+            { q: "What is the name of the vast tropical wetland region shared by Brazil, Paraguay, and Bolivia?", a: "Pantanal", options: ["Sertão", "Mata Atlântica", "Pantanal", "Pampas"] },
+            { q: "What is the name of the Brazilian martial art that incorporates music and dance?", a: "Capoeira", options: ["Jiu-Jitsu", "Capoeira", "Luta Livre", "Karate-Dô"] },
+            { q: "Which famous beach is located in Rio de Janeiro?", a: "Copacabana", options: ["Porto de Galinhas", "Praia do Forte", "Jericoacoara", "Copacabana"] },
+            { q: "The name 'Brazil' comes from a type of tree known as:", a: "Brazilwood (Pau-Brasil)", options: ["Rubber Tree", "Ipe", "Brazilwood (Pau-Brasil)", "Palm Tree"] },
+            { q: "Which region of Brazil is considered the most industrialized?", a: "Southeast Region", options: ["Northeast Region", "South Region", "Southeast Region", "Midwest Region"] },
+            { q: "Who is considered the 'King of Football' in Brazil?", a: "Pelé", options: ["Ronaldo", "Garrincha", "Zico", "Pelé"] },
+            { q: "What is the name of the long, dry season in the Northeast of Brazil?", a: "Sertão", options: ["Caatinga", "Sertão", "Chapada", "Várzea"] },
+            { q: "The city of Manaus is located in the middle of which forest?", a: "Amazon Rainforest", options: ["Atlantic Forest", "Pampas", "Cerrado", "Amazon Rainforest"] },
+            { q: "What is *Feijoada*?", a: "A black bean and meat stew", options: ["A corn dish", "A black bean and meat stew", "A type of sweet bread", "A fried pastry"] },
+            { q: "What is the largest hydroelectric power plant in the world (currently)?", a: "Three Gorges Dam (in China)", options: ["Itaipu Dam", "Belo Monte Dam", "Three Gorges Dam (in China)", "Tucuruí Dam"] },
+            { q: "What is the famous geological formation in Rio de Janeiro, next to Christ the Redeemer?", a: "Sugarloaf Mountain (Pão de Açúcar)", options: ["Corcovado", "Pedra da Gávea", "Sugarloaf Mountain (Pão de Açúcar)", "Dois Irmãos"] },
+            { q: "Brazil’s flag contains how many stars?", a: "27", options: ["26", "27", "21", "25"] },
+            { q: "What type of large, flightless bird is native to Brazil?", a: "Rhea", options: ["Ostrich", "Emu", "Rhea", "Cassowary"] }
+        ];
 
-  // --- 20 NEW QUESTIONS ---
-  { q: "Which river is the largest by volume in Brazil?", options: ["Amazon", "São Francisco", "Paraná", "Negro"], answer: 0 },
-  { q: "Which animal is a symbol of the Amazon rainforest?", options: ["Jaguar", "Lion", "Kangaroo", "Eagle"], answer: 0 },
-  { q: "What sport is Brazil most famous for?", options: ["Cricket", "Soccer", "Baseball", "Rugby"], answer: 1 },
-  { q: "In which city is the Christ the Redeemer statue located?", options: ["Brasília", "Recife", "Rio de Janeiro", "Fortaleza"], answer: 2 },
-  { q: "What is the famous Brazilian festival featuring parades and costumes?", options: ["Carnival", "Oktoberfest", "Diwali", "Lunar New Year"], answer: 0 },
-  { q: "Which Brazilian martial art combines dance and combat?", options: ["Judo", "Capoeira", "Taekwondo", "Muay Thai"], answer: 1 },
-  { q: "Brazil is the world’s largest producer of which crop?", options: ["Coffee", "Rice", "Corn", "Wheat"], answer: 0 },
-  { q: "Which biome covers most of central Brazil?", options: ["Cerrado", "Tundra", "Taiga", "Savanna"], answer: 0 },
-  { q: "What is the Brazilian currency?", options: ["Peso", "Real", "Dollar", "Cruzeiro"], answer: 1 },
-  { q: "Which ocean borders Brazil?", options: ["Pacific", "Indian", "Arctic", "Atlantic"], answer: 3 },
-  { q: "Which Brazilian state is the largest by area?", options: ["Amazonas", "Pará", "Bahia", "Mato Grosso"], answer: 0 },
-  { q: "What is a popular Brazilian cheese-filled snack?", options: ["Pão de Queijo", "Empanada", "Arepa", "Croissant"], answer: 0 },
-  { q: "Which city hosted the 2016 Summer Olympics?", options: ["Buenos Aires", "Rio de Janeiro", "Lisbon", "São Paulo"], answer: 1 },
-  { q: "Brazil shares a border with all but which South American country?", options: ["Chile", "Argentina", "Colombia", "Peru"], answer: 0 },
-  { q: "Which famous rainforest covers much of northern Brazil?", options: ["Congo", "Amazon", "Sherwood", "Sundarbans"], answer: 1 },
-  { q: "What is the name of Brazil’s largest aviation company?", options: ["LATAM Brazil", "Azul", "Embraer", "GOL"], answer: 2 },
-  { q: "Which city is known for its futuristic architecture by Oscar Niemeyer?", options: ["Brasília", "Manaus", "Curitiba", "Porto Alegre"], answer: 0 },
-  { q: "What is the name of Brazil’s biggest television network?", options: ["Telemundo", "Rede Globo", "SBT", "RecordTV"], answer: 1 },
-  { q: "Which Brazilian musician is famous for bossa nova?", options: ["Antonio Carlos Jobim", "Shakira", "Luis Fonsi", "Ricky Martin"], answer: 0 },
-  { q: "Which popular Brazilian dish includes black beans and pork?", options: ["Feijoada", "Moqueca", "Coxinha", "Brigadeiro"], answer: 0 }
-];
-let remainingQuestions = [];
-let currentQuestion = null;
-let score = 0;
-const triviaQuestionEl = document.getElementById("trivia-question");
-const optionsDiv = document.getElementById("trivia-options");
-const nextBtn = document.getElementById("next-btn");
-const scoreEl = document.getElementById("score");
+        // Emojis for the memory game (8 unique pairs)
+        const brazilianEmojis = [
+            { name: "Palm Tree", img: "🌴" },
+            { name: "Wave/Beach", img: "🌊" },
+            { name: "Parrot", img: "🦜" },
+            { name: "Monkey", img: "🐒" },
+            { name: "Fruit (Açaí/Berry)", img: "🍓" }, 
+            { name: "Rainforest (Tree)", img: "🌳" },
+            { name: "Rainforest (River)", img: "🛶" },
+            { name: "Rainforest (Frog)", img: "🐸" }
+        ];
 
-document.getElementById("start-trivia").onclick = () => {
-    remainingQuestions = [...triviaQuestions];
-    score = 0;
-    scoreEl.textContent = "";
-    nextBtn.classList.add("hidden");
-    loadQuestion();
-};
+        // --- Utility Function ---
 
-function loadQuestion() {
-    if (remainingQuestions.length === 0) {
-        triviaQuestionEl.textContent = "You're done! Final score: " + score;
-        optionsDiv.innerHTML = "";
-        nextBtn.classList.add("hidden");
-        return;
-    }
-    currentQuestion = remainingQuestions.splice(Math.floor(Math.random() * remainingQuestions.length), 1)[0];
-    triviaQuestionEl.textContent = currentQuestion.q;
-    optionsDiv.innerHTML = "";
-    currentQuestion.options.forEach((opt, i) => {
-        let btn = document.createElement("button");
-        btn.textContent = opt;
-        btn.className = "option-btn";
-        btn.onclick = () => selectAnswer(btn, i);
-        optionsDiv.appendChild(btn);
-    });
-}
-
-function selectAnswer(btn, index) {
-    const optionButtons = optionsDiv.querySelectorAll("button");
-    optionButtons.forEach(b => b.disabled = true);
-
-    if (index === currentQuestion.answer) {
-        btn.classList.add("correct");
-        score++;
-    } else {
-        btn.classList.add("incorrect");
-        optionButtons[currentQuestion.answer].classList.add("correct");
-    }
-    scoreEl.textContent = `Score: ${score}`;
-    nextBtn.classList.remove("hidden");
-}
-
-nextBtn.onclick = () => {
-    nextBtn.classList.add("hidden");
-    loadQuestion();
-};
-
-/*************************** CAPOEIRA RHYTHM ***************************/
-const pads = document.querySelectorAll('.pad');
-const seqDisplay = document.getElementById('sequence-display');
-const resultEl = document.getElementById('rhythm-result');
-let sequence = [];
-let userIndex = 0;
-const keys = ['A','S','D','F'];
-
-function playSound(key) {
-    const audio = document.getElementById('snd-' + key);
-    if (audio) { audio.currentTime = 0; audio.play(); }
-}
-
-function flashPad(key) {
-    const pad = document.querySelector(`.pad[data-key="${key}"]`);
-    if (pad) {
-        pad.style.background = '#00b2ff';
-        playSound(key);
-        setTimeout(() => pad.style.background = '#0084c7', 300);
-    }
-}
-
-document.getElementById('start-rhythm').onclick = () => {
-    sequence = [];
-    userIndex = 0;
-    resultEl.textContent = "";
-    addToSequence();
-};
-
-function addToSequence() {
-    const nextKey = keys[Math.floor(Math.random()*keys.length)];
-    sequence.push(nextKey);
-    seqDisplay.textContent = "Sequence: " + sequence.join(' ');
-
-    let delay = 0;
-    sequence.forEach(k => {
-        setTimeout(() => flashPad(k), delay);
-        delay += 600;
-    });
-
-    userIndex = 0;
-}
-
-function handleUserInput(key) {
-    playSound(key);
-    if (key === sequence[userIndex]) {
-        userIndex++;
-        if (userIndex === sequence.length) {
-            resultEl.textContent = "Correct! Adding next step...";
-            setTimeout(addToSequence, 800);
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
         }
-    } else {
-        resultEl.textContent = "Wrong move! Game over.";
-    }
-}
+        
+        // Hardcoded colors for reliability
+        const correctColor = '#4CAF50';
+        const incorrectColor = '#F44336';
 
-pads.forEach(p => p.onclick = () => handleUserInput(p.dataset.key));
+        // --- TRIVIA GAME LOGIC (Unchanged) ---
 
-document.addEventListener('keydown', e => {
-    const key = e.key.toUpperCase();
-    if (keys.includes(key)) handleUserInput(key);
-});
-</script>
+        let currentTriviaQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestions = new Set(); 
+
+        function startTriviaGame() {
+            // 1. Reset state
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('trivia-results').innerHTML = ''; 
+            document.getElementById('trivia-next').style.display = 'none';
+
+            // 2. Select 5 unique questions
+            let availableQuestions = triviaQuestions.filter((q, index) => !answeredQuestions.has(index));
+
+            if (availableQuestions.length < 5) {
+                answeredQuestions.clear();
+                availableQuestions = [...triviaQuestions];
+            }
+            
+            shuffleArray(availableQuestions);
+            currentTriviaQuestions = availableQuestions.slice(0, 5);
+            
+            // Mark the selected questions as answered
+            currentTriviaQuestions.forEach(q => {
+                const index = triviaQuestions.findIndex(originalQ => originalQ.q === q.q);
+                if (index !== -1) {
+                     answeredQuestions.add(index);
+                }
+            });
+
+            // 3. Display first question
+            displayTriviaQuestion();
+        }
+
+        function displayTriviaQuestion() {
+            if (currentQuestionIndex >= 5) {
+                showTriviaResults();
+                return;
+            }
+
+            const qData = currentTriviaQuestions[currentQuestionIndex];
+            
+            document.getElementById('trivia-question-number').textContent = `Question ${currentQuestionIndex + 1}/5`;
+            document.getElementById('trivia-question-text').textContent = qData.q;
+            document.getElementById('trivia-options').innerHTML = '';
+            document.getElementById('trivia-next').style.display = 'none';
+
+            // Shuffle options for the current question
+            const shuffledOptions = [...qData.options];
+            shuffleArray(shuffledOptions);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.onclick = () => checkTriviaAnswer(button, option, qData.a);
+                document.getElementById('trivia-options').appendChild(button);
+            });
+        }
+
+        function checkTriviaAnswer(clickedButton, selectedOption, correctAnswer) {
+            document.querySelectorAll('#trivia-options button').forEach(btn => btn.disabled = true);
+
+            if (selectedOption === correctAnswer) {
+                clickedButton.classList.add('correct');
+                score++;
+            } else {
+                clickedButton.classList.add('incorrect');
+                document.querySelectorAll('#trivia-options button').forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            if (currentQuestionIndex < 4) {
+                 document.getElementById('trivia-next').style.display = 'block';
+            } else {
+                 document.getElementById('trivia-next').style.display = 'none';
+                 setTimeout(showTriviaResults, 1000); 
+            }
+        }
+
+        function nextTriviaQuestion() {
+            currentQuestionIndex++;
+            displayTriviaQuestion();
+        }
+
+        function showTriviaResults() {
+            let message = '';
+            const messageColor = score >= 3 ? correctColor : incorrectColor;
+
+            if (score === 5) {
+                message = "Perfeito! You are a Brazilian master!";
+            } else if (score >= 3) {
+                message = "Muito Bom! You know your facts!";
+            } else {
+                message = "Keep learning! Time to study some more Brazil trivia.";
+            }
+
+            document.getElementById('trivia-question-number').textContent = `Fim (End)!`;
+            document.getElementById('trivia-question-text').textContent = `Quiz Finished.`;
+            document.getElementById('trivia-options').innerHTML = '';
+            document.getElementById('trivia-next').style.display = 'none';
+            
+            document.getElementById('trivia-results').innerHTML = `
+                <p style="font-size: 1.5em; color: ${messageColor};">
+                    You got <strong>${score} out of 5</strong> correct.
+                </p>
+                <p style="font-size: 1.1em; font-style: italic;">
+                    "${message}"
+                </p>
+                <button id="trivia-play-again" onclick="startTriviaGame()">Play Again</button>
+            `;
+        }
+        
+        // --- EMOJI MEMORY GAME LOGIC (UPDATED) ---
+        
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let timerId = null;
+        let timeLeft = 60;
+        let gameStarted = false;
+
+        function startMemoryGame() {
+            // Reset state
+            cards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            timeLeft = 60;
+            gameStarted = true;
+            document.getElementById('memory-results').innerHTML = '';
+            document.getElementById('memory-status').textContent = "Find the matching pairs!";
+            document.getElementById('memory-start').style.display = 'none';
+            document.getElementById('timer').textContent = timeLeft;
+            
+            // Prepare 16 cards (2 of each of the 8 emojis)
+            const gameData = [...brazilianEmojis, ...brazilianEmojis];
+            shuffleArray(gameData);
+            
+            const gameBoard = document.getElementById('memory-game');
+            gameBoard.innerHTML = '';
+            
+            gameData.forEach((emoji, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.name = emoji.name; // Use the name for matching
+                cardElement.dataset.index = index;
+                cardElement.onclick = () => flipCard(cardElement);
+
+                cardElement.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">?</div>
+                        <div class="card-back">${emoji.img}</div>
+                    </div>
+                `;
+                gameBoard.appendChild(cardElement);
+                cards.push(cardElement);
+            });
+            
+            // Start the timer
+            clearInterval(timerId);
+            timerId = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                endMemoryGame(false); // Time's up, lost
+            }
+        }
+
+        function flipCard(cardElement) {
+            if (!gameStarted || cardElement.classList.contains('flipped') || cardElement.classList.contains('match') || flippedCards.length === 2) {
+                return;
+            }
+
+            cardElement.classList.add('flipped');
+            flippedCards.push(cardElement);
+
+            if (flippedCards.length === 2) {
+                // Temporarily disable all card clicks while checking match
+                document.querySelectorAll('.card:not(.match)').forEach(c => c.onclick = null);
+                setTimeout(checkForMatch, 800);
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.dataset.name === card2.dataset.name) {
+                // Match found
+                card1.classList.add('match');
+                card2.classList.add('match');
+                matchedPairs++;
+                document.getElementById('memory-status').textContent = "You found a match! 🎉";
+                simpleConfetti(card1.dataset.name);
+
+                if (matchedPairs === brazilianEmojis.length) {
+                    clearInterval(timerId);
+                    setTimeout(() => endMemoryGame(true), 500); // Won!
+                }
+            } else {
+                // No match, flip them back
+                document.getElementById('memory-status').textContent = "No match. Try again!";
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                }, 1000);
+            }
+
+            // Re-enable clicks on unmatched cards after the check (and flip back delay, if any)
+            setTimeout(() => {
+                document.querySelectorAll('.card:not(.match)').forEach(c => {
+                    if (!c.classList.contains('flipped')) { 
+                        c.onclick = () => flipCard(c);
+                    }
+                });
+            }, 1000); // Wait for flip back to finish (1000ms delay used above)
+            
+            flippedCards = [];
+        }
+        
+        function simpleConfetti(message) {
+             const confettiDiv = document.getElementById('confetti');
+             const burst = document.createElement('div');
+             burst.style.cssText = `
+                 position: absolute;
+                 top: 50%;
+                 left: 50%;
+                 transform: translate(-50%, -50%);
+                 font-size: 3em;
+                 animation: simpleConfettiAnim 1.5s forwards;
+             `;
+             burst.innerHTML = `🌟 ${message} 🎊`;
+             confettiDiv.appendChild(burst);
+
+             setTimeout(() => {
+                 burst.remove();
+             }, 1500);
+        }
+
+        function endMemoryGame(won) {
+            gameStarted = false;
+            clearInterval(timerId);
+            document.getElementById('memory-start').style.display = 'block';
+            document.querySelectorAll('.card').forEach(c => c.onclick = null); // Ensure all cards are unclickable
+
+            const messageColor = won ? correctColor : incorrectColor;
+
+            if (won) {
+                document.getElementById('memory-status').innerHTML = `
+                    <p style="font-size: 1.8em; color: ${messageColor};">
+                        🏆 Parabéns! You found all the emojis with ${timeLeft} seconds left!
+                    </p>
+                `;
+                // Celebrate with lots of confetti and emojis!
+                document.getElementById('confetti').innerHTML = `
+                     <div style="position: absolute; top: 20%; left: 50%; transform: translateX(-50%); font-size: 5em;">
+                         🎉🌴🌊🐒🥳
+                     </div>
+                `;
+                 setTimeout(() => document.getElementById('confetti').innerHTML = '', 3000); 
+            } else {
+                document.getElementById('memory-status').innerHTML = `
+                    <p style="font-size: 1.5em; color: ${messageColor};">
+                        Time's up! You got ${matchedPairs} out of ${brazilianEmojis.length} pairs.
+                    </p>
+                `;
+            }
+            
+             document.getElementById('memory-results').innerHTML = `
+                <button id="memory-play-again" onclick="startMemoryGame()">Play Again</button>
+             `;
+        }
+
+        // --- Initialization ---
+        function initializeGames() {
+            startTriviaGame();
+            
+            // Display initial memory game board (cards face down)
+            const gameBoard = document.getElementById('memory-game');
+            gameBoard.innerHTML = `
+                 <p style="grid-column: 1 / span 4; text-align: center; color: #666;">
+                    Press 'Start Game' to shuffle the emojis and begin the 60 second timer!
+                 </p>
+            `;
+            document.getElementById('timer').textContent = 60;
+        }
+
+        window.onload = initializeGames;
+
+    </script>
 </body>
 </html>
